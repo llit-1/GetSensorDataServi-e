@@ -1,0 +1,4 @@
+{
+  "ConnectionString": "Data Source=RKSQL.shzhleb.ru\\SQL2019; Initial Catalog=POWER_BI; User ID=rk7; Password=wZSbs6NKl2SF; MultipleActiveResultSets=True;TrustServerCertificate=True",
+"Interval": 600000
+}
