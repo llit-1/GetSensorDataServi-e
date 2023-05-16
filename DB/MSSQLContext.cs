@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GetSensorDataServiсe.DB
+namespace GetSensorDataService.DB
 {
     internal class MSSQLContext : DbContext
     {

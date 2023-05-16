@@ -1,6 +1,6 @@
 ﻿using SnmpSharpNet;
 
-namespace GetSensorDataServiсe
+namespace GetSensorDataService
 {
     internal static class GetData // класс для выполнения snmp запросов
     {

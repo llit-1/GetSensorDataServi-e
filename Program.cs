@@ -1,17 +1,42 @@
-﻿using GetSensorDataServiсe;
-using GetSensorDataServiсe.DB;
+﻿using GetSensorDataService;
+using GetSensorDataService.DB;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
-File.AppendAllText("logs.txt", $"\n{DateTime.Now} Старт службы GetSensorDataServise"); //логируем запуск приложения
+
+string LogPath = "C:\\GetSensorDataService\\logs.txt";
+string JsonPath = "C:\\GetSensorDataService\\appconfig.json";
+try
+{
+    File.AppendAllText(LogPath, $"\n{DateTime.Now} Старт службы GetSensorDataServise"); //логируем запуск приложения
+}
+catch (Exception ex)
+{
+    File.AppendAllText("123.txt", $"\n{DateTime.Now} {ex.Message}"); //логируем запуск приложения
+}
+
 
 while (true) //приложение выполняет 1 бесконечный цикл
 {
-    string json = File.ReadAllText("appconfig.json"); // достаём настройки из appconfig.json
-    Settings settings = JsonSerializer.Deserialize<Settings>(json);
-    DbContextOptionsBuilder<GetSensorDataServiсe.DB.MSSQLContext> dbContextOptionsBuilder = new(); // создаём настройки подключения к бд
-    dbContextOptionsBuilder.UseSqlServer(settings.ConnectionString); 
-    int Interval = settings.Interval;
+    string connectionString = "";
+    int Interval = 0;
+    try
+    {
+        string json = File.ReadAllText(JsonPath); // достаём настройки из appconfig.json
+        Settings settings = JsonSerializer.Deserialize<Settings>(json);
+        connectionString = settings.ConnectionString;        
+        Interval = settings.Interval;
+    }
+
+    catch (Exception ex)
+    {
+        File.AppendAllText(LogPath, $"\n{DateTime.Now} {ex.Message}");
+        Thread.Sleep(60000);
+        continue;
+    }
+
+    DbContextOptionsBuilder<GetSensorDataService.DB.MSSQLContext> dbContextOptionsBuilder = new(); // создаём настройки подключения к бд
+    dbContextOptionsBuilder.UseSqlServer(connectionString);
 
     using (MSSQLContext db = new(dbContextOptionsBuilder.Options)) // подключаемся к бд
     {
@@ -30,10 +55,10 @@ while (true) //приложение выполняет 1 бесконечный 
             }
             catch (Exception ex)
             {
-                File.AppendAllText("logs.txt", ex.Message);
+                File.AppendAllText(LogPath, ex.Message);
             }
         }
-        File.AppendAllText("logs.txt", $"\n{DateTime.Now} Данные успешно сохранены"); //логируем успешное завершение
+        File.AppendAllText(LogPath, $"\n{DateTime.Now} Данные успешно сохранены"); //логируем успешное завершение
     }
     Thread.Sleep(Interval); // делаем паузу на время указанное в appconfig.json
 }
