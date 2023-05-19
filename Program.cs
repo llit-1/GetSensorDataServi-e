@@ -12,7 +12,7 @@ try
 }
 catch (Exception ex)
 {
-    File.AppendAllText("123.txt", $"\n{DateTime.Now} {ex.Message}"); //логируем запуск приложения
+    File.AppendAllText("logs.txt", $"\n{DateTime.Now} {ex.Message}"); 
 }
 
 
@@ -24,7 +24,7 @@ while (true) //приложение выполняет 1 бесконечный 
     {
         string json = File.ReadAllText(JsonPath); // достаём настройки из appconfig.json
         Settings settings = JsonSerializer.Deserialize<Settings>(json);
-        connectionString = settings.ConnectionString;        
+        connectionString = settings.ConnectionString;
         Interval = settings.Interval;
     }
 
@@ -34,16 +34,16 @@ while (true) //приложение выполняет 1 бесконечный 
         Thread.Sleep(60000);
         continue;
     }
-
-    DbContextOptionsBuilder<GetSensorDataService.DB.MSSQLContext> dbContextOptionsBuilder = new(); // создаём настройки подключения к бд
-    dbContextOptionsBuilder.UseSqlServer(connectionString);
-
-    using (MSSQLContext db = new(dbContextOptionsBuilder.Options)) // подключаемся к бд
+    try
     {
-        foreach (var item in db.SensorRooms) // для каждого датчика из комнаты выполняем запрос
+        DbContextOptionsBuilder<GetSensorDataService.DB.MSSQLContext> dbContextOptionsBuilder = new(); // создаём настройки подключения к бд
+        dbContextOptionsBuilder.UseSqlServer(connectionString);
+
+        using (MSSQLContext db = new(dbContextOptionsBuilder.Options)) // подключаемся к бд
         {
-            try
+            foreach (var item in db.SensorRooms) // для каждого датчика из комнаты выполняем запрос
             {
+
                 SensorData sensorData = new SensorData();
                 sensorData.RoomId = item.Id;
                 sensorData.RoomName = item.Name;
@@ -51,14 +51,14 @@ while (true) //приложение выполняет 1 бесконечный 
                 sensorData.Humidity = GetData.GetHumidity(item.Ip);
                 sensorData.Date = DateTime.Now;
                 db.Add(sensorData);
-                db.SaveChanges(); // сохраняем данные
+                db.SaveChanges(); // сохраняем данные           
             }
-            catch (Exception ex)
-            {
-                File.AppendAllText(LogPath, ex.Message);
-            }
+            File.AppendAllText(LogPath, $"\n{DateTime.Now} Данные успешно сохранены"); //логируем успешное завершение
         }
-        File.AppendAllText(LogPath, $"\n{DateTime.Now} Данные успешно сохранены"); //логируем успешное завершение
+    }
+    catch (Exception ex)
+    {
+        File.AppendAllText(LogPath, $"\n{ex.Message}");
     }
     Thread.Sleep(Interval); // делаем паузу на время указанное в appconfig.json
 }
