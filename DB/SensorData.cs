@@ -11,8 +11,8 @@ namespace GetSensorDataService.DB
         public int Id { get; set; }
         public int RoomId { get; set; }
         public string RoomName { get; set; }
-        public int Temperature { get; set; }
-        public int Humidity { get; set; }
+        public int? Temperature { get; set; }
+        public int? Humidity { get; set; }
         public DateTime Date { get; set; }
     }
 }

@@ -5,7 +5,7 @@ namespace GetSensorDataService
     internal static class GetData // класс для выполнения snmp запросов
     {
 
-        internal static int GetTemperature(string ip) // получение температуры
+        internal static int? GetTemperature(string ip) // получение температуры
         {
             string key = ".1.3.6.1.4.1.58162.1.0";
             try
@@ -15,13 +15,12 @@ namespace GetSensorDataService
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("snmp connection error"))
-                { throw new Exception(ex.Message); }
-                throw new Exception($"{DateTime.Now} Ошибка при получении температуры для {ip}");
+                Logging.Log($"Ошибка при получении температуры для {ip}");
+                return null;
             }
         }
 
-        internal static int GetHumidity(string ip) // получение влажности
+        internal static int? GetHumidity(string ip) // получение влажности
         {
             string key = ".1.3.6.1.4.1.58162.2.0";
             try
@@ -31,19 +30,18 @@ namespace GetSensorDataService
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("snmp connection error"))
-                { throw new Exception(ex.Message); }
-                throw new Exception($"{DateTime.Now} Ошибка при получении влажности для {ip}");
+                Logging.Log($"Ошибка при получении влажности для {ip}");
+                return null;
             }
         }
 
         private static string GetSnmpData(string ip, string key) // базовый метод запроса
         {
-            string comunity = "public";
-            Oid uints = new Oid(key);
-            SimpleSnmp snmp = new SimpleSnmp(ip, comunity);
-            if (snmp.Valid)
+            try
             {
+                string comunity = "public";
+                Oid uints = new Oid(key);
+                SimpleSnmp snmp = new SimpleSnmp(ip, comunity);
                 Pdu pdu = new Pdu();
                 pdu.Type = PduType.Get;
                 pdu.VbList.Add(key);
@@ -52,7 +50,10 @@ namespace GetSensorDataService
                 data.TryGetValue(uints, out value);
                 return value.ToString();
             }
-            throw new Exception("snmp connection error");
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
         }
     }
 }

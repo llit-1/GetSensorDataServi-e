@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 
-string LogPath = "C:\\GetSensorDataService\\logs.txt";
+Logging.Path = "C:\\GetSensorDataService\\logs.txt";
 string JsonPath = "C:\\GetSensorDataService\\appconfig.json";
 try
 {
-    File.AppendAllText(LogPath, $"\n{DateTime.Now} Старт службы GetSensorDataServise"); //логируем запуск приложения
+    Logging.Log("Старт службы GetSensorDataServise"); //логируем запуск приложения
 }
 catch (Exception ex)
 {
-    File.AppendAllText("logs.txt", $"\n{DateTime.Now} {ex.Message}"); 
+    File.AppendAllText("logs.txt", $"\n{DateTime.Now} {ex.Message}");
 }
 
 
@@ -30,7 +30,7 @@ while (true) //приложение выполняет 1 бесконечный 
 
     catch (Exception ex)
     {
-        File.AppendAllText(LogPath, $"\n{DateTime.Now} {ex.Message}");
+        Logging.Log(ex.Message);
         Thread.Sleep(60000);
         continue;
     }
@@ -50,15 +50,19 @@ while (true) //приложение выполняет 1 бесконечный 
                 sensorData.Temperature = GetData.GetTemperature(item.Ip);
                 sensorData.Humidity = GetData.GetHumidity(item.Ip);
                 sensorData.Date = DateTime.Now;
+                if (sensorData.Temperature == null && sensorData.Humidity == null)
+                {
+                    continue;
+                }
                 db.Add(sensorData);
                 db.SaveChanges(); // сохраняем данные           
             }
-            File.AppendAllText(LogPath, $"\n{DateTime.Now} Данные успешно сохранены"); //логируем успешное завершение
+            Logging.Log("Данные успешно сохранены"); //логируем успешное завершение
         }
     }
     catch (Exception ex)
     {
-        File.AppendAllText(LogPath, $"\n{ex.Message}");
+        Logging.Log(ex.Message);
     }
     Thread.Sleep(Interval); // делаем паузу на время указанное в appconfig.json
 }
