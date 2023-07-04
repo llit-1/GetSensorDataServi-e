@@ -41,7 +41,7 @@ namespace GetSensorDataService
             {
                 string comunity = "public";
                 Oid uints = new Oid(key);
-                SimpleSnmp snmp = new SimpleSnmp(ip, comunity);
+                SimpleSnmp snmp = new SimpleSnmp(ip.Trim(), comunity);
                 Pdu pdu = new Pdu();
                 pdu.Type = PduType.Get;
                 pdu.VbList.Add(key);

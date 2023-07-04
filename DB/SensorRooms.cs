@@ -11,5 +11,6 @@ namespace GetSensorDataService.DB
         public int Id { get; set; }
         public string Name { get; set; }
         public string Ip { get; set; }
+        public int Actual { get; set; }
     }
 }

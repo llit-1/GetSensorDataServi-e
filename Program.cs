@@ -12,7 +12,7 @@ try
 }
 catch (Exception ex)
 {
-    File.AppendAllText("logs.txt", $"\n{DateTime.Now} {ex.Message}");
+    File.AppendAllText("logs.txt", $"\n{DateTime.Now} {ex.Message}"); 
 }
 
 
@@ -41,7 +41,7 @@ while (true) //приложение выполняет 1 бесконечный 
 
         using (MSSQLContext db = new(dbContextOptionsBuilder.Options)) // подключаемся к бд
         {
-            foreach (var item in db.SensorRooms) // для каждого датчика из комнаты выполняем запрос
+            foreach (var item in db.SensorRooms.Where(c => c.Actual>0)) // для каждого датчика из комнаты выполняем запрос
             {
 
                 SensorData sensorData = new SensorData();
@@ -50,7 +50,7 @@ while (true) //приложение выполняет 1 бесконечный 
                 sensorData.Temperature = GetData.GetTemperature(item.Ip);
                 sensorData.Humidity = GetData.GetHumidity(item.Ip);
                 sensorData.Date = DateTime.Now;
-                if (sensorData.Temperature == null && sensorData.Humidity == null)
+                if (sensorData.Temperature==null && sensorData.Humidity == null)
                 {
                     continue;
                 }
@@ -62,7 +62,7 @@ while (true) //приложение выполняет 1 бесконечный 
     }
     catch (Exception ex)
     {
-        Logging.Log(ex.Message);
+       Logging.Log(ex.Message);
     }
     Thread.Sleep(Interval); // делаем паузу на время указанное в appconfig.json
 }
